@@ -15,8 +15,18 @@
                     </a>
                 </td>
                 <td>
+                    {{todo.done}}
+                </td>
+                <td>
                     <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
-                        <button type="submit" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
+                        <button type="submit" class="btn btn-xs btn-danger">
+                            <span class="glyphicon glyphicon-remove glyphicon-white"></span>
+                        </button>
+                    </form>
+                    <form method="post" action="{{ url_for('todo_is_done',id=todo.id, done=todo.done) }}">
+                        <button type="submit" class="btn btn-xs btn-success">
+                            <span class="glyphicon glyphicon-ok glyphicon-white"></span>
+                        </button>
                     </form>
                 </td>
             </tr>
@@ -25,6 +35,8 @@
             <form method="post" action="{{ url_for('todos_POST') }}">
                 <td colspan="3">
                     <input type="textbox" name="description" class="small-6 small-center" placeholder="Description...">
+                </td>
+                <td>
                 </td>
                 <td>
                     <button type="submit" class="btn btn-sm btn-primary">Add</button>

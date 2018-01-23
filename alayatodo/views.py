@@ -1,4 +1,4 @@
-from alayatodo import app
+from alayatodo import app, models
 from flask import (
     g,
     redirect,

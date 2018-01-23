@@ -29,7 +29,7 @@ class Todos(db.Model):
    done = db.Column(db.Boolean)
 
 
-   def __init__(self, user_id, description,done):
+   def __init__(self, user_id, description,done=False):
      self.user_id = user_id
      self.description = description
      self.done = done

@@ -58,11 +58,15 @@ def todo(id):
 def todos():
     if not session.get('logged_in'):
         return redirect('/login')
-    db.engine.connect()
-    todos = Todos.query.all()
+    return redirect('/todo/pages/1')
 
-    return render_template('todos.html', todos=todos)
-
+@app.route('/todo/pages/<int:page>',methods=['GET'])
+def pagination(page=1):
+    if not session.get('logged_in'):
+        return redirect('/login')
+    perPage = 10
+    page = Todos.query.order_by(Todos.id.desc()).paginate(page,perPage,False)
+    return render_template('todos.html',todos=page)
 
 @app.route('/todo', methods=['POST'])
 @app.route('/todo/', methods=['POST'])
@@ -106,7 +110,6 @@ def todo_to_json(id):
 def todo_is_done(id,done):  
     if not session.get('logged_in'):
         return redirect('/login')
-    print("Type : {}, Value {}".format(type(done), done))
     completed = False if done == "True" else True
     todo = Todos.query.filter_by(id=id).first()
     todo.done = completed

@@ -5,7 +5,7 @@
     <h1>Todo List:</h1>
     <table class="table table-striped">
         <th>#</th><th>User</th><th>Description</th><th>Completed</th><th>Action</th>
-        {% for todo in todos %}
+        {% for todo in todos.items %}
             <tr>
                 <td>{{ todo.id }}</td>
                 <td>{{ todo.user_id }}</td>
@@ -44,5 +44,13 @@
             </form>
         </tr>
     </table>
+    {% if todos.has_prev %}
+        <a href="{{ url_for('pagination', page=todos.prev_num) }}">&lt;&lt; Newer posts</a>
+    {% else %}
+        &lt;&lt; Newer posts{% endif %} | 
+    {% if todos.has_next %}
+        <a href="{{ url_for('pagination', page=todos.next_num) }}">Older posts &gt;&gt;</a>
+        {% else %}Older posts &gt;&gt;
+    {% endif %}
 </div>
 {% endblock %}

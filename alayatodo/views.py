@@ -65,7 +65,7 @@ def pagination(page=1):
     if not session.get('logged_in'):
         return redirect('/login')
     perPage = 10
-    page = Todos.query.order_by(Todos.id.desc()).paginate(page,perPage,False)
+    page = Todos.query.filter_by(user_id=session['user']['id']).order_by(Todos.id.desc(),).paginate(page,perPage,False)
     return render_template('todos.html',todos=page)
 
 @app.route('/todo', methods=['POST'])
@@ -84,7 +84,6 @@ def todos_POST():
     else :
         return flash('You need to give a description to your task','error')
         
-
 
 @app.route('/todo/<id>', methods=['POST'])
 def todo_delete(id):

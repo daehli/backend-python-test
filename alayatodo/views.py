@@ -5,7 +5,8 @@ from flask import (
     render_template,
     request,
     session,
-    jsonify
+    jsonify,
+    flash
     )
 
 
@@ -48,7 +49,10 @@ def logout():
 def todo(id):
     cur = g.db.execute("SELECT * FROM todos WHERE id ='%s'" % id)
     todo = cur.fetchone()
-    return render_template('todo.html', todo=todo)
+    if todo:
+        return render_template('todo.html', todo=todo)
+    else:
+        return redirect('/todo')
 
 
 @app.route('/todo', methods=['GET'])
@@ -74,10 +78,10 @@ def todos_POST():
             % (session['user']['id'], request.form.get('description', ''))
         )
         g.db.commit()
+        flash('Congratulation you have added a new task')
         return redirect('/todo')
     else :
-        # TODO: return Error Message
-        return redirect('/todo')
+        return flash('You need to give a description to your task','error')
         
 
 
@@ -87,6 +91,7 @@ def todo_delete(id):
         return redirect('/login')
     g.db.execute("DELETE FROM todos WHERE id ='%s'" % id)
     g.db.commit()
+    flash('You have delete a task')
     return redirect('/todo')
 
 
@@ -108,4 +113,8 @@ def todo_is_done(id,done):
     completed = 1 if int(done) == 0 else 0
     g.db.execute("UPDATE todos SET done = %d where id ='%s'" %(completed,id))
     g.db.commit()
+    if completed:
+        flash('You have done a task','info')
+    else :
+        flash('You have undo a task','info')
     return redirect('/todo')

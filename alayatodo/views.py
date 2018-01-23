@@ -1,4 +1,5 @@
-from alayatodo import app, models
+from alayatodo import app
+from alayatodo.models import db, Users, Todos
 from flask import (
     g,
     redirect,
@@ -27,9 +28,7 @@ def login_POST():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    sql = "SELECT * FROM users WHERE username = '%s' AND password = '%s'";
-    cur = g.db.execute(sql % (username, password))
-    user = cur.fetchone()
+    user = Users.query.filter_by(username=username,password=password).first()
     if user:
         session['user'] = dict(user)
         session['logged_in'] = True
@@ -47,8 +46,7 @@ def logout():
 
 @app.route('/todo/<id>', methods=['GET'])
 def todo(id):
-    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s'" % id)
-    todo = cur.fetchone()
+    todo = Todos.query.filter_by(id=id).first()
     if todo:
         return render_template('todo.html', todo=todo)
     else:
@@ -60,8 +58,9 @@ def todo(id):
 def todos():
     if not session.get('logged_in'):
         return redirect('/login')
-    cur = g.db.execute("SELECT * FROM todos")
-    todos = cur.fetchall()
+    db.engine.connect()
+    todos = Todos.query.all()
+
     return render_template('todos.html', todos=todos)
 
 
@@ -73,11 +72,9 @@ def todos_POST():
 
     descriptionIsPresent = request.form.get('description')
     if descriptionIsPresent:
-        g.db.execute(
-            "INSERT INTO todos (user_id, description) VALUES ('%s', '%s')"
-            % (session['user']['id'], request.form.get('description', ''))
-        )
-        g.db.commit()
+        todo = Todos(session['user']['id'],descriptionIsPresent)
+        db.session.add(todo)
+        db.session.commit()
         flash('Congratulation you have added a new task')
         return redirect('/todo')
     else :
@@ -89,30 +86,32 @@ def todos_POST():
 def todo_delete(id):
     if not session.get('logged_in'):
         return redirect('/login')
-    g.db.execute("DELETE FROM todos WHERE id ='%s'" % id)
-    g.db.commit()
+    todo = Todos.query.filter_by(id=id).first()
+    db.session.delete(todo)
+    db.session.commit()
     flash('You have delete a task')
     return redirect('/todo')
 
 
 @app.route('/todo/<id>/json', methods=['GET'])
 def todo_to_json(id):
-    sql = "SELECT * FROM todos where id='%d'"
-    curr = g.db.execute(sql % (int(id)))
-    todoObj = curr.fetchone()
-    if todoObj:
-        todoObj = dict(todoObj)
-        return jsonify(todoObj)
+    todo = Todos.query.filter_by(id=id).first()
+    if todo:
+        todo = todo.serialize()
+        print("Type : {0}, Value : {1}".format(type(todo),todo))
+        return jsonify(todo)
 
 
 
 @app.route('/todo/<id>/<done>',methods=['POST'])
-def todo_is_done(id,done):
+def todo_is_done(id,done):  
     if not session.get('logged_in'):
         return redirect('/login')
-    completed = 1 if int(done) == 0 else 0
-    g.db.execute("UPDATE todos SET done = %d where id ='%s'" %(completed,id))
-    g.db.commit()
+    completed = False if done is True else True
+    print("Type : {0}, value : {1}".format(type(completed),completed))
+    todo = Todos.query.filter_by(id=id).first()
+    todo.done = completed
+    db.session.commit()
     if completed:
         flash('You have done a task','info')
     else :

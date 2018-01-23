@@ -6,3 +6,6 @@ install :
 
 init_db :
 	bin/python main.py initdb
+
+drop_db:
+	rm -rf /tmp/alayatodo.db

@@ -92,8 +92,12 @@ def todo_delete(id):
 
 @app.route('/todo/<id>/json', methods=['GET'])
 def todo_to_json(id):
-    sql = "SELECT * FROM todo where id='%d'"
-    curr = g.db.execute(sql % (id))
+    sql = "SELECT * FROM todos where id='%d'"
+    curr = g.db.execute(sql % (int(id)))
+    todoObj = curr.fetchone()
+    if todoObj:
+        todoObj = dict(todoObj)
+        return jsonify(todoObj)
 
 
 

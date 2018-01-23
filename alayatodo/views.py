@@ -4,7 +4,8 @@ from flask import (
     redirect,
     render_template,
     request,
-    session
+    session,
+    jsonify
     )
 
 
@@ -91,7 +92,10 @@ def todo_delete(id):
 
 @app.route('/todo/<id>/json', methods=['GET'])
 def todo_to_json(id):
-    
+    sql = "SELECT * FROM todo where id='%d'"
+    curr = g.db.execute(sql % (id))
+
+
 
 @app.route('/todo/<id>/<done>',methods=['POST'])
 def todo_is_done(id,done):

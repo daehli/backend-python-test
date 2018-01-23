@@ -30,7 +30,7 @@ def login_POST():
 
     user = Users.query.filter_by(username=username,password=password).first()
     if user:
-        session['user'] = dict(user)
+        session['user'] = user.serialize()
         session['logged_in'] = True
         return redirect('/todo')
 
@@ -98,7 +98,6 @@ def todo_to_json(id):
     todo = Todos.query.filter_by(id=id).first()
     if todo:
         todo = todo.serialize()
-        print("Type : {0}, Value : {1}".format(type(todo),todo))
         return jsonify(todo)
 
 
@@ -107,8 +106,8 @@ def todo_to_json(id):
 def todo_is_done(id,done):  
     if not session.get('logged_in'):
         return redirect('/login')
-    completed = False if done is True else True
-    print("Type : {0}, value : {1}".format(type(completed),completed))
+    print("Type : {}, Value {}".format(type(done), done))
+    completed = False if done == "True" else True
     todo = Todos.query.filter_by(id=id).first()
     todo.done = completed
     db.session.commit()

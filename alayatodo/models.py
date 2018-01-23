@@ -14,6 +14,10 @@ class Users(db.Model):
     self.password = password
     self.username = username
 
+  def serialize(self):
+    return {
+      'id' : self.id,
+    }
   def __repr__(self):
     return '<User %r>' % self.id
 

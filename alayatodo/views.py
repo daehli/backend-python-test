@@ -82,7 +82,9 @@ def todos_POST():
         flash('Congratulation you have added a new task')
         return redirect('/todo')
     else :
-        return flash('You need to give a description to your task','error')
+        flash('You need to give a description to your task','error')
+        return redirect('/todo')
+
         
 
 @app.route('/todo/<id>', methods=['POST'])

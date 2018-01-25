@@ -8,11 +8,8 @@ from docopt import docopt
 import subprocess
 import os
 
-from alayatodo import app
-from alayatodo.models import db
+from alayatodo import app, db
 from alayatodo.fixtures import init_fixture
-from flask_sqlalchemy import SQLAlchemy
-
 
 if __name__ == '__main__':
     args = docopt(__doc__)  

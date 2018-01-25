@@ -1,7 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-from alayatodo import app
-
-db = SQLAlchemy(app)
+from alayatodo import db
 
 class Users(db.Model):
   __tablename__ = 'user'

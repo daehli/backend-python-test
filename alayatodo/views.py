@@ -1,5 +1,5 @@
-from alayatodo import app
-from alayatodo.models import db, Users, Todos
+from alayatodo import app, db
+from alayatodo.models import Users, Todos
 from flask import (
     g,
     redirect,
@@ -10,6 +10,8 @@ from flask import (
     flash
     )
 
+
+MAX_PER_PAGE = 10 
 
 @app.route('/')
 def home():
@@ -32,8 +34,10 @@ def login_POST():
     if user:
         session['user'] = user.serialize()
         session['logged_in'] = True
+        flash('Success Login')
         return redirect('/todo')
 
+    flash('Bad username or password')
     return redirect('/login')
 
 
@@ -41,6 +45,7 @@ def login_POST():
 def logout():
     session.pop('logged_in', None)
     session.pop('user', None)
+    flash('You are logout')
     return redirect('/')
 
 
@@ -50,7 +55,15 @@ def todo(id):
     if todo:
         return render_template('todo.html', todo=todo)
     else:
+        flash('No Task on this ID')
         return redirect('/todo')
+
+@app.route('/todo/<id>/json', methods=['GET'])
+def todo_to_json(id):
+    todo = Todos.query.filter_by(id=id).first()
+    if todo:
+        todo = todo.serialize()
+        return jsonify(todo)
 
 
 @app.route('/todo', methods=['GET'])
@@ -58,14 +71,14 @@ def todo(id):
 def todos():
     if not session.get('logged_in'):
         return redirect('/login')
-    return redirect('/todo/pages/1')
+    return redirect('/todo/pages/1') 
+
 
 @app.route('/todo/pages/<int:page>',methods=['GET'])
 def pagination(page=1):
     if not session.get('logged_in'):
         return redirect('/login')
-    perPage = 10
-    page = Todos.query.filter_by(user_id=session['user']['id']).order_by(Todos.id.desc()).paginate(page,perPage,False)
+    page = Todos.query.filter_by(user_id=session['user']['id']).order_by(Todos.id.desc()).paginate(page,MAX_PER_PAGE,False)
     return render_template('todos.html',todos=page)
 
 @app.route('/todo', methods=['POST'])
@@ -98,12 +111,6 @@ def todo_delete(id):
     return redirect('/todo')
 
 
-@app.route('/todo/<id>/json', methods=['GET'])
-def todo_to_json(id):
-    todo = Todos.query.filter_by(id=id).first()
-    if todo:
-        todo = todo.serialize()
-        return jsonify(todo)
 
 
 

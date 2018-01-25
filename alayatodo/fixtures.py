@@ -1,6 +1,5 @@
 from alayatodo.models import Todos, Users
-from alayatodo.models import db 
-
+from alayatodo import db
 
 def init_fixture():
   user1 = Users(username="user1",password="user1")
@@ -35,5 +34,3 @@ def init_fixture():
   db.session.add(todo9)
 
   db.session.commit()
-
-  print('Fixtures')

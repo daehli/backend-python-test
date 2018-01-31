@@ -7,9 +7,10 @@ from flask import (
     request,
     session,
     jsonify,
-    flash
+    flash,
+    abort
     )
-
+import re
 
 MAX_PER_PAGE = 10 
 
@@ -51,7 +52,9 @@ def logout():
 
 @app.route('/todo/<id>', methods=['GET'])
 def todo(id):
-    todo = Todos.query.filter_by(id=id).first()
+    if not session.get('logged_in'):
+        return redirect('/login')
+    todo = Todos.query.filter_by(id=id,user_id=session['user']['id']).first()
     if todo:
         return render_template('todo.html', todo=todo)
     else:
@@ -60,10 +63,14 @@ def todo(id):
 
 @app.route('/todo/<id>/json', methods=['GET'])
 def todo_to_json(id):
-    todo = Todos.query.filter_by(id=id).first()
+    if not session.get('logged_in'):
+        return redirect('/login')
+    todo = Todos.query.filter_by(id=id,user_id=session['user']['id']).first()
     if todo:
         todo = todo.serialize()
         return jsonify(todo)
+    else:
+        abort(404)
 
 
 @app.route('/todo', methods=['GET'])
@@ -87,9 +94,9 @@ def todos_POST():
     if not session.get('logged_in'):
         return redirect('/login')
 
-    descriptionIsPresent = request.form.get('description')
-    if descriptionIsPresent:
-        todo = Todos(session['user']['id'],descriptionIsPresent)
+    descriptionValue = request.form.get('description')
+    if re.match(r'\w',descriptionValue):
+        todo = Todos(user_id=session['user']['id'],description=descriptionValue,done=False)
         db.session.add(todo)
         db.session.commit()
         flash('Congratulation you have added a new task')
@@ -104,26 +111,32 @@ def todos_POST():
 def todo_delete(id):
     if not session.get('logged_in'):
         return redirect('/login')
-    todo = Todos.query.filter_by(id=id).first()
-    db.session.delete(todo)
-    db.session.commit()
-    flash('You have delete a task')
-    return redirect('/todo')
-
-
-
-
+    todo = Todos.query.filter_by(id=id,user_id=session['user']['id']).first()
+    if todo: 
+        db.session.delete(todo)
+        db.session.commit()
+        flash('You have delete a task')
+        return redirect('/todo')
+    else:
+        abort(404)
 
 @app.route('/todo/<id>/<done>',methods=['POST'])
 def todo_is_done(id,done):  
     if not session.get('logged_in'):
         return redirect('/login')
-    completed = False if done == "True" else True
-    todo = Todos.query.filter_by(id=id).first()
-    todo.done = completed
-    db.session.commit()
-    if completed:
-        flash('You have done a task','info')
-    else :
-        flash('You have undo a task','info')
-    return redirect('/todo')
+    completed = False if re.match(r'true|yes',done,re.IGNORECASE) else True
+    todo = Todos.query.filter_by(id=id,user_id=session['user']['id']).first()
+    if todo:
+        todo.done = completed
+        db.session.commit()
+        if completed:
+            flash('You have done a task','info')
+        else :
+            flash('You have undo a task','info')
+        return redirect('/todo')
+    else:
+        abort(404)
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404

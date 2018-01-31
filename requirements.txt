@@ -2,3 +2,5 @@ Flask
 Jinja2
 docopt
 flask-sqlalchemy
+Flask-Migrate
+Flask-Script

@@ -9,3 +9,12 @@ init_db :
 
 drop_db:
 	rm -rf /tmp/alayatodo.db
+
+migrate:
+	bin/python main.py db migrate
+
+upgrade:
+	bin/python main.py db upgrade
+
+init:
+	bin/python main.py db init

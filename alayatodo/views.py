@@ -75,12 +75,6 @@ def todo_to_json(id):
 
 @app.route('/todo', methods=['GET'])
 @app.route('/todo/', methods=['GET'])
-def todos():
-    if not session.get('logged_in'):
-        return redirect('/login')
-    return redirect('/todo/pages/1') 
-
-
 @app.route('/todo/pages/<int:page>',methods=['GET'])
 def pagination(page=1):
     if not session.get('logged_in'):
